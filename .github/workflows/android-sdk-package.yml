@@ -96,17 +96,19 @@ jobs:
         run: |
           cat > "$RUNNER_TEMP/github-packages.init.gradle" <<'EOF'
           gradle.projectsEvaluated {
-              def sdk = gradle.rootProject.project(':sdk:sdk-android')
-              sdk.publishing.repositories.maven {
-                  name = 'GitHubPackages'
-                  url = uri('https://maven.pkg.github.com/15cm/matrix-rust-sdk')
-                  credentials {
-                      username = System.getenv('GITHUB_ACTOR')
-                      password = System.getenv('GITHUB_TOKEN')
+              def sdk = gradle.rootProject.findProject(':sdk:sdk-android')
+              if (sdk != null) {
+                  sdk.publishing.repositories.maven {
+                      name = 'GitHubPackages'
+                      url = uri('https://maven.pkg.github.com/15cm/matrix-rust-sdk')
+                      credentials {
+                          username = System.getenv('GITHUB_ACTOR')
+                          password = System.getenv('GITHUB_TOKEN')
+                      }
                   }
-              }
-              sdk.tasks.withType(org.gradle.plugins.signing.Sign).configureEach {
-                  enabled = false
+                  sdk.tasks.withType(org.gradle.plugins.signing.Sign).configureEach {
+                      enabled = false
+                  }
               }
           }
           EOF
