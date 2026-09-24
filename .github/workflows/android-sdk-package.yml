@@ -40,9 +40,14 @@ jobs:
         uses: malinskiy/action-android/install-sdk@fa103ef30331e95f266418a6a97e98f61f626887 # release/0.1.7
 
       - name: Install pinned Android NDK
-        uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1
-        with:
-          ndk-version: 29.0.14206865
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager --install "ndk;$NDK_VERSION"
+          ndk_path="$ANDROID_SDK_ROOT/ndk/$NDK_VERSION"
+          test -d "$ndk_path"
+          grep -Fxq "Pkg.Revision = $NDK_VERSION" "$ndk_path/source.properties"
+          echo "ANDROID_NDK=$ndk_path" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ndk_path" >> "$GITHUB_ENV"
 
       - name: Install pinned Rust toolchain and Android targets
         uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
